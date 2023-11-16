@@ -180,15 +180,17 @@ $(function () {
           doc = parser.parseFromString(raw_description, "text/html");
           description = doc.body.firstChild.innerText;
           attribute = make_attrubute();
-        } catch (e) { console.log(e) }
 
-        const obj_input = {"uuid_project":uuid,
-          "uuid_task":list_parent_tasks[index_task],
-          "name":parent_task_name,
-          "description": description, // "社會影響力足跡: " + parent_task_name,
-          "attribute":attribute};
+          const obj_input = {"uuid_project":uuid,
+            "uuid_task":list_parent_tasks[index_task],
+            "name":parent_task_name,
+            "description": description, // "社會影響力足跡: " + parent_task_name,
+            "attribute":attribute};
 
-        mintNFT(obj_input);
+          mintNFT(obj_input);
+        } catch (e) {
+            console.log(e);
+        }
       }
     }
 
