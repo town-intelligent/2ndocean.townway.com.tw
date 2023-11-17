@@ -14,6 +14,7 @@ import { getSroiData } from "./api/sroi.js";
 import { renderHandlebars } from "./utils/handlebars.js";
 import { parse_sdgs_items } from "./utils/transformers.js";
 import { isOverflow } from "./utils/widgets.js";
+import { getNFT } from "./nft.js";
 
 export function draw_sdgs_chart(totalProjectWeight, elementID) {
   // Remove useless weight
@@ -418,7 +419,14 @@ export async function set_page_info_content() {
     obj_div_des.append(obj_p_period);
     obj_div_des.append(obj_p_idea);
 
-    // TODO: NFT
+    // Update NFT
+    var txn_nft = "https://testnets.opensea.io/assets/mumbai/0x63818f1dd00287d70a9e8e976618471a3659d30a/17";
+    var obj_nft = getNFT(obj_task.uuid);
+
+    if (obj_nft !== null && typeof obj_nft !== "undefined") {
+      txn_nft = obj_nft.txn;
+    }
+
     var obj_p_nft = document.createElement("p");
     obj_p_nft.className = "bg-light ml-2 p-3 text-wrap";
 
@@ -428,8 +436,7 @@ export async function set_page_info_content() {
 
     var obj_span_nft_hash = document.createElement("span");
     obj_span_nft_hash.className = "word-wrap";
-    obj_span_nft_hash.innerHTML =
-      '<input type="button" value="0x63818f1dd00287d70a9e8e976618471a3659d30a" onclick="window.open(\'https://testnets.opensea.io/assets/mumbai/0x63818f1dd00287d70a9e8e976618471a3659d30a/17\', \'_blank\');" />';
+    obj_span_nft_hash.innerHTML = '<input type="button" value="NFT on OpenSea" onclick="window.open(\'' + txn_nft + '\', \'_blank\');" />';
 
     obj_p_nft.append(obj_span_nft);
     obj_p_nft.append(obj_span_nft_hash);
@@ -446,6 +453,63 @@ export async function set_page_info_content() {
 
     // Draw task weight
     draw_project_chart(obj_task.uuid, chartId);
+
+    // Tabs
+    $(".tabs a").on("click", (e) => {
+      e.preventDefault();
+
+      $('.tabs a').addClass('text-muted').removeClass('text-dark');
+      $(e.target).removeClass('text-muted').addClass('text-dark');
+
+      $(".tabs .tabs-section").hide();
+      $($(e.target).attr("href")).show();
+    });
+
+    $('.tabs a').get(0).click();
+
+    // SROI
+    const sroiData = await getSroiData(uuid);
+    const { social_subtotal, economy_subtotal, environment_subtotal } =
+      sroiData;
+
+    if (
+      social_subtotal == 0 &&
+      economy_subtotal == 0 &&
+      environment_subtotal == 0
+    ) {
+
+      sroiData.visible = false;
+    }
+
+    const html = document.getElementById("tpl-sroi-section").innerHTML;
+    const template = Handlebars.compile(html);
+    document.getElementById("sroi-section").innerHTML = template(sroiData);
+
+    const labels = ["社會價值", "經濟價值", "環境價值"];
+    const datasetData = [
+      social_subtotal,
+      economy_subtotal,
+      environment_subtotal,
+    ];
+
+    // 當社會價值、經濟價值、環境價值都為0時，不顯示圓餅圖
+    try {
+      if (isValidDoughnutChartData(datasetData)) {
+        draw_doughnut_chart({
+          element: document.querySelector("#sroi-section #sroi_chart"),
+          data: {
+            labels,
+            datasets: [
+              {
+                data: datasetData,
+              },
+            ],
+          },
+        });
+      }
+    } catch (e) {
+      console.log(e)
+    }
   }
 
   // Tabs
