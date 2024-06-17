@@ -1,4 +1,4 @@
-import { draws } from './app.js'
+// import { draws } from './app.js'
 import { list_plans, plan_info, append_plan_submit_data, plan_submit, delete_plan, list_plan_tasks, getProjectWeight } from './plan.js'
 import { task_submit, child_task_submit } from './tasks.js'
 import { mintNFT, make_attrubute } from './nft.js'
@@ -259,6 +259,8 @@ export function cms_plan_add_parent_tasks(uuid_task) {
   // Update project
   var form_plan = new FormData();
   form_plan = append_plan_submit_data(page, form_plan);
+
+  // Submit
   plan_submit(form_plan, uuid);
 
   // GPS check
